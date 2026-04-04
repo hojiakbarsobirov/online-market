@@ -16,7 +16,7 @@ const FooterPage = () => {
                 <AiOutlineShoppingCart size={22} />
               </div>
               <span className="text-xl font-black text-gray-800 tracking-tighter">
-                MARKET<span className="text-purple-600">.</span>
+                ZooMarket.
               </span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed">

@@ -10,8 +10,11 @@ import FooterPage from './components/FooterPage';
 import HomePage from './pages/HomePage';
 import Register from './pages/Register'; 
 import MyProfile from './pages/MyProfile';
-import AllProducts from './pages/AllProducts';
+import AllProducts from './pages/MyProducts';
 import AddProducts from './pages/AddProducts';
+import SavedPage from './pages/SavedPage';
+import ProductDetails from './pages/ProductDetails';
+import SellerProfile from './pages/SellerProfile'; // <-- YANGI IMPORT
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -42,19 +45,16 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  // Auth tekshirilgunga qadar sahifa ko'rsatilmasin
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          {/* <p className="text-gray-600 font-semibold">Yuklanmoqda...</p> */}
         </div>
       </div>
     );
   }
 
-  // Register sahifasida Navbar va Footer ko'rinmasligi uchun
   const isRegisterPage = location.pathname === '/register';
 
   return (
@@ -62,7 +62,6 @@ const App = () => {
       {!isRegisterPage && <Navbar />}
       
       <Routes>
-        {/* Asosiy sahifa */}
         <Route 
           path="/" 
           element={
@@ -74,7 +73,6 @@ const App = () => {
           } 
         />
         
-        {/* Ro'yxatdan o'tish sahifasi */}
         <Route 
           path="/register" 
           element={
@@ -86,13 +84,15 @@ const App = () => {
           } 
         />
 
-        {/* Barcha mahsulotlar */}
-        <Route 
-          path="/all-products" 
-          element={<AllProducts />} 
-        />
+        <Route path="/my-products" element={<AllProducts />} />
+        <Route path="/saved" element={<SavedPage />} />
 
-        {/* Mahsulot qo'shish - faqat tizimga kirganlar uchun */}
+        {/* Mahsulot batafsil sahifasi */}
+        <Route path="/product/:id" element={<ProductDetails />} />
+
+        {/* Sotuvchi profili sahifasi -- YANGI ROUTE */}
+        <Route path="/seller/:id" element={<SellerProfile />} />
+
         <Route 
           path="/add-products" 
           element={
@@ -104,7 +104,6 @@ const App = () => {
           } 
         />
 
-        {/* Mening profilim - faqat tizimga kirganlar uchun */}
         <Route 
           path="/my-profile" 
           element={
@@ -116,20 +115,17 @@ const App = () => {
           } 
         />
 
-        {/* 404 - Sahifa topilmadi */}
+        {/* 404 Sahifa */}
         <Route 
           path="*" 
           element={
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-              <div className="text-center">
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 text-center">
+              <div>
                 <h1 className="text-6xl font-black text-gray-800 mb-4">404</h1>
                 <p className="text-xl text-gray-600 mb-8">Sahifa topilmadi</p>
-                <a 
-                  href="/" 
-                  className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 transition-all inline-block"
-                >
-                  Asosiy sahifaga qaytish
-                </a>
+                <button onClick={() => navigate('/')} className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold">
+                  Bosh sahifa
+                </button>
               </div>
             </div>
           } 

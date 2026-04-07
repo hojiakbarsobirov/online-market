@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -14,13 +14,15 @@ import AllProducts from './pages/MyProducts';
 import AddProducts from './pages/AddProducts';
 import SavedPage from './pages/SavedPage';
 import ProductDetails from './pages/ProductDetails';
-import SellerProfile from './pages/SellerProfile'; // <-- YANGI IMPORT
+import SellerProfile from './pages/SellerProfile';
+import ChatPage from './pages/ChatPage';
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [hasData, setHasData] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -56,66 +58,53 @@ const App = () => {
   }
 
   const isRegisterPage = location.pathname === '/register';
+  
+  // Footer faqat Bosh sahifa (/) va Mening profilim (/my-profile) sahifalarida chiqishi uchun:
+  const shouldShowFooter = location.pathname === '/' || location.pathname === '/my-profile';
+
+  const ProtectedRoute = ({ children }) => {
+    if (!user) return <Navigate to="/" replace />;
+    if (!hasData) return <Navigate to="/register" replace />;
+    return children;
+  };
 
   return (
     <>
       {!isRegisterPage && <Navbar />}
       
       <Routes>
-        <Route 
-          path="/" 
-          element={
-            user ? (
-              hasData ? <HomePage /> : <Navigate to="/register" replace />
-            ) : (
-              <HomePage />
-            )
-          } 
-        />
+        <Route path="/" element={user && !hasData ? <Navigate to="/register" replace /> : <HomePage />} />
         
         <Route 
           path="/register" 
-          element={
-            user && !hasData ? (
-              <Register />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={user && !hasData ? <Register /> : <Navigate to="/" replace />} 
         />
 
         <Route path="/my-products" element={<AllProducts />} />
         <Route path="/saved" element={<SavedPage />} />
-
-        {/* Mahsulot batafsil sahifasi */}
         <Route path="/product/:id" element={<ProductDetails />} />
-
-        {/* Sotuvchi profili sahifasi -- YANGI ROUTE */}
         <Route path="/seller/:id" element={<SellerProfile />} />
 
         <Route 
+          path="/chats" 
+          element={<ProtectedRoute><ChatPage /></ProtectedRoute>} 
+        />
+        
+        <Route 
+          path="/chat/:sellerId" 
+          element={<ProtectedRoute><ChatPage /></ProtectedRoute>} 
+        />
+
+        <Route 
           path="/add-products" 
-          element={
-            user && hasData ? (
-              <AddProducts />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={<ProtectedRoute><AddProducts /></ProtectedRoute>} 
         />
 
         <Route 
           path="/my-profile" 
-          element={
-            user && hasData ? (
-              <MyProfile />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
+          element={<ProtectedRoute><MyProfile /></ProtectedRoute>} 
         />
 
-        {/* 404 Sahifa */}
         <Route 
           path="*" 
           element={
@@ -132,7 +121,8 @@ const App = () => {
         />
       </Routes>
 
-      {!isRegisterPage && <FooterPage />}
+      {/* Footer mantiqi yangilandi */}
+      {shouldShowFooter && <FooterPage />}
     </>
   );
 };
